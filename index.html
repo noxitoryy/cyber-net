@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cyber/net.sys</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "MS Gothic", "Courier New", monospace;
+        scrollbar-width: none;
+      }
+
+      :root {
+        --primary-rgb: 156, 255, 156;
+        --primary-color: rgb(var(--primary-rgb));
+        --theme-hue: 85deg;
+        --bg-color: #050505;
+      }
+
+      *::-webkit-scrollbar {
+        display: none;
+      }
+
+      ::selection {
+        background-color: var(--primary-color);
+        color: black;
+
+        filter: grayscale(1) sepia(1) hue-rotate(85deg) saturate(2)
+          brightness(0.9) contrast(1.1);
+        opacity: 0.2;
+      }
+
+      ::-moz-selection {
+        background-color: var(--primary-color);
+        color: black;
+
+        filter: grayscale(1) sepia(1) hue-rotate(85deg) saturate(2)
+          brightness(0.9) contrast(1.1);
+        opacity: 0.2;
+      }
+
+      body {
+        background: black;
+        color: #cfcfcf;
+        overflow: hidden;
+        height: 100vh;
+
+        text-shadow:
+          2px 0 rgba(255, 0, 0, 0.5),
+          -2px 0 rgba(0, 255, 255, 0.5);
+      }
+      body::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+      body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.03),
+          rgba(255, 255, 255, 0.03) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        pointer-events: none;
+        z-index: 999;
+      }
+      body.no-scanlines::before {
+        display: none;
+      }
+      body.no-overlay::before,
+      body.no-overlay::after {
+        display: none;
+      }
+      body.no-overlay {
+        text-shadow: none;
+      }
+      body.no-glitch .glitch {
+        animation: none;
+      }
+      body.no-glitch .cursor::after {
+        animation: none;
+        opacity: 1;
+      }
+      body.no-grayscale video {
+        filter: sepia(0.1) contrast(1.1) brightness(0.8);
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(
+          circle,
+          transparent 60%,
+          rgba(0, 0, 0, 0.7)
+        );
+        pointer-events: none;
+        z-index: 998;
+      }
+
+      body.theme-nightmare {
+        background-color: #080000;
+        text-shadow:
+          3px 0 rgba(200, 0, 0, 0.8),
+          -3px 0 rgba(100, 0, 0, 0.8);
+      }
+      body.theme-nightmare::after {
+        background: radial-gradient(
+          circle,
+          transparent 75%,
+          rgba(40, 0, 0, 0.8) 95%,
+          rgba(0, 0, 0, 1) 100%
+        );
+        box-shadow: inset 0 0 100px rgba(0, 0, 0, 1);
+      }
+      body.theme-nightmare::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent,
+          transparent 2px,
+          rgba(255, 0, 0, 0.15) 2px,
+          rgba(255, 0, 0, 0.15) 4px
+        );
+        background-size: 100% 8px;
+        animation: scroll-static 0.2s infinite steps(4);
+        opacity: 0.3;
+        pointer-events: none;
+        z-index: 999;
+      }
+      body.theme-nightmare .window,
+      body.theme-nightmare .navi,
+      body.theme-nightmare .status {
+        border-color: #600;
+        background: #050000;
+      }
+      body.theme-nightmare .container {
+        animation: noise-flicker 0.15s infinite alternate;
+      }
+      @keyframes noise-flicker {
+        0% {
+          filter: contrast(1.2) brightness(0.8) sepia(0.5);
+          transform: translate(0, 0);
+        }
+        25% {
+          filter: contrast(1.4) brightness(0.9) sepia(0.7);
+          transform: translate(-1px, 0);
+        }
+        50% {
+          filter: contrast(1.1) brightness(0.7) sepia(0.4);
+          transform: translate(1px, 0);
+        }
+        75% {
+          filter: contrast(1.5) brightness(0.6) sepia(0.8);
+          transform: translate(0, 1px);
+        }
+        100% {
+          filter: contrast(1.3) brightness(0.8) sepia(0.6);
+          transform: translate(0, -1px);
+        }
+      }
+      body.no-shake .container {
+        animation: none;
+      }
+      body.no-rgb {
+        text-shadow: 0 0 2px rgba(var(--primary-rgb), 0.5);
+      }
+      @keyframes scroll-static {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 0 32px;
+        }
+      }
+
+      body.theme-space {
+        --primary-rgb: 160, 210, 255;
+        --theme-hue: 210deg;
+        background-color: #000;
+      }
+      body.theme-space .window {
+        background: rgba(8, 8, 8, 0.85);
+        border-color: rgba(160, 210, 255, 0.2);
+        box-shadow: 0 0 15px rgba(160, 210, 255, 0.1);
+      }
+      body.theme-space .navi {
+        background: #080808;
+        border-right-color: rgba(160, 210, 255, 0.2);
+      }
+      body.theme-space #starfield-canvas {
+        display: block;
+      }
+      body.theme-space .home-image {
+        filter: drop-shadow(0 0 8px var(--primary-color));
+        opacity: 1;
+      }
+      body.theme-space::before,
+      body.theme-space::after {
+        display: none !important;
+      }
+      body.theme-space .glitch {
+        animation: none !important;
+      }
+      body.theme-space video {
+        filter: none !important;
+      }
+
+      .container {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        height: 100%;
+      }
+
+      .navi {
+        background: #050505;
+        border-right: 1px solid #222;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: auto;
+      }
+      .navi a.active {
+        color: var(--primary-color);
+
+        text-shadow:
+          0 0 4px rgba(var(--primary-rgb), 0.6),
+          0 0 8px rgba(var(--primary-rgb), 0.3);
+      }
+      .navi h1 {
+        font-size: 14px;
+        color: var(--primary-color);
+        text-shadow: 0 0 6px rgba(var(--primary-rgb), 0.6);
+      }
+      .navi a {
+        color: #bcbcbc;
+        text-decoration: none;
+        font-size: 13px;
+        padding: 4px 6px;
+        border-left: 2px solid transparent;
+      }
+      .navi a:hover {
+        border-left: 2px solid var(--primary-color);
+        background: #0b0b0b;
+
+        text-shadow:
+          0 0 4px rgba(var(--primary-rgb), 0.35),
+          0 0 8px rgba(var(--primary-rgb), 0.2);
+      }
+
+      .status {
+        margin-top: auto;
+        font-size: 13px;
+        color: #999;
+        background: #0a0a0a;
+        padding: 10px;
+        border: 1px solid #222;
+      }
+
+      .content {
+        padding: 20px;
+        overflow-y: auto;
+        height: 100%;
+      }
+
+      .window {
+        display: none;
+        border: 1px solid #222;
+        background: #020202;
+        padding: 12px;
+        max-width: 96%;
+        position: relative;
+        margin: 0 auto;
+      }
+      .window.active {
+        display: block;
+      }
+      .window-title {
+        font-size: 12px;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+      }
+      .window.active.section {
+        text-shadow:
+          0 0 4px rgba(var(--primary-rgb), 0.2),
+          0 0 8px rgba(var(--primary-rgb), 0.15);
+      }
+      #home {
+        display: none;
+      }
+      #home.active {
+        display: block;
+      }
+
+      .file,
+      .toggle {
+        cursor: pointer;
+        padding: 3px 0;
+      }
+      .file:hover,
+      .toggle:hover {
+        color: var(--primary-color);
+      }
+
+      .home-image {
+        width: 55px;
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        margin: 0;
+
+        filter: grayscale(1) sepia(1) hue-rotate(var(--theme-hue)) saturate(2)
+          brightness(0.9) contrast(1.1);
+
+        opacity: 0.4;
+      }
+
+      .sys-info {
+        margin-top: 15px;
+        font-size: 11px;
+        color: #777;
+      }
+      .resource-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 4px;
+      }
+      .resource-row span {
+        width: 110px;
+      }
+      .resource-bar {
+        background: #333;
+        width: 100px;
+        height: 8px;
+        position: relative;
+      }
+      .resource-fill {
+        background: var(--primary-color);
+        height: 100%;
+        width: 50%;
+      }
+      video {
+        width: 100%;
+        max-height: 85vh;
+        object-fit: contain;
+        margin-top: 8px;
+        filter: grayscale(1) sepia(0.1) contrast(1.1);
+        opacity: 0.9;
+      }
+
+      .media-visual {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--primary-color);
+        opacity: 0.8;
+      }
+      .media-visual::after {
+        content: "_";
+        animation: blink 1s infinite steps(1);
+      }
+
+      #media:fullscreen {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: #000;
+      }
+      #media:fullscreen video {
+        max-height: calc(100vh - 140px);
+      }
+
+      #theme-bg-video {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -1;
+        opacity: 0.4;
+        display: none;
+        pointer-events: none;
+      }
+
+      #theme-bg-image {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -1;
+        opacity: 0.6;
+        display: none;
+        pointer-events: none;
+      }
+
+      #starfield-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        display: none;
+        pointer-events: none;
+      }
+
+      .media-controls {
+        margin-top: 16px;
+        border-top: 1px dashed #333;
+        padding-top: 12px;
+        user-select: none;
+      }
+      .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: #111;
+        border: 1px solid #333;
+        margin-bottom: 10px;
+        cursor: pointer;
+        position: relative;
+      }
+      .progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        width: 0%;
+        opacity: 0.6;
+        pointer-events: none;
+      }
+      .controls-row {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        cursor: pointer;
+        color: #bcbcbc;
+      }
+      .btn:hover {
+        color: var(--primary-color);
+        text-shadow: 0 0 4px rgba(var(--primary-rgb), 0.4);
+      }
+      .time-display {
+        font-family: monospace;
+        color: #777;
+        margin-left: auto;
+      }
+      .volume-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        width: 80px;
+        cursor: pointer;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        background: #333;
+        height: 2px;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        background: var(--primary-color);
+        height: 10px;
+        width: 6px;
+        margin-top: -4px;
+      }
+      input[type="range"]::-moz-range-track {
+        background: #333;
+        height: 2px;
+      }
+      input[type="range"]::-moz-range-thumb {
+        background: var(--primary-color);
+        height: 10px;
+        width: 6px;
+        border: none;
+        border-radius: 0;
+      }
+      input[type="range"]:focus {
+        outline: none;
+      }
+
+      .dotting::after {
+        content: "";
+        animation: dots 1.8s infinite steps(1);
+      }
+
+      .glitch {
+        animation: glitch 2.5s infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes glitch {
+        25% {
+          text-shadow:
+            -1px 0 red,
+            1px 0 cyan;
+        }
+        75% {
+          text-shadow:
+            1px 0 red,
+            -1px 0 cyan;
+        }
+      }
+
+      @keyframes dots {
+        0% {
+          content: "";
+        }
+        20% {
+          content: ".";
+        }
+        40% {
+          content: "..";
+        }
+        60% {
+          content: "...";
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr;
+        }
+        .navi {
+          border-right: none;
+          border-bottom: 1px solid #222;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px;
+          gap: 8px;
+        }
+        .navi h1 {
+          width: auto;
+          margin-bottom: 0;
+          font-size: 16px;
+          margin-right: auto;
+        }
+        .status {
+          width: 100%;
+          text-align: center;
+          margin-top: 8px;
+        }
+        .content {
+          padding: 10px;
+        }
+      }
+
+      #bootScreen,
+      #powerOffScreen,
+      #loginScreen {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: var(--primary-color);
+        font-family: monospace;
+        padding: 20px;
+        user-select: none;
+      }
+      #bootScreen {
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .boot-line {
+        margin-bottom: 5px;
+      }
+
+      #powerButton {
+        background: transparent;
+        border: 2px solid #333;
+        color: #333;
+        padding: 15px 30px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        font-family: "MS Gothic", monospace;
+      }
+      #powerButton:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.3);
+        text-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5);
+      }
+
+      .login-box {
+        border: 1px solid #333;
+        padding: 20px;
+        width: 300px;
+        max-width: 100%;
+      }
+      .login-row {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+      }
+      .login-row label {
+        font-size: 12px;
+        margin-bottom: 5px;
+        color: #777;
+      }
+      .login-input {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #333;
+        color: var(--primary-color);
+        font-family: "MS Gothic", monospace;
+        font-size: 16px;
+        padding: 5px;
+        outline: none;
+      }
+      .login-input:focus {
+        border-bottom-color: var(--primary-color);
+      }
+      .login-btn {
+        background: #111;
+        border: 1px solid #333;
+        color: #bcbcbc;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-family: "MS Gothic", monospace;
+        margin-top: 10px;
+        width: 100%;
+        transition: all 0.2s;
+      }
+      .login-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.2);
+      }
+
+      .crt-off {
+        animation: turn-off 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+      }
+      @keyframes turn-off {
+        0% {
+          transform: scale(1, 1.3) translate3d(0, 0, 0);
+          filter: brightness(1);
+          opacity: 1;
+        }
+        60% {
+          transform: scale(1, 0.001) translate3d(0, 0, 0);
+          filter: brightness(10);
+        }
+        100% {
+          transform: scale(0, 0.001) translate3d(0, 0, 0);
+          filter: brightness(0);
+          opacity: 0;
+        }
+      }
+
+      .crt-on {
+        animation: turn-on 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+      }
+      @keyframes turn-on {
+        0% {
+          transform: scale(1, 0.001) translate3d(0, 0, 0);
+          filter: brightness(0);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1, 0.001) translate3d(0, 0, 0);
+          filter: brightness(10);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1, 1) translate3d(0, 0, 0);
+          filter: brightness(1);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="starfield-canvas"></canvas>
+    <video id="theme-bg-video" loop muted playsinline></video>
+    <img id="theme-bg-image" alt="" />
+    <div id="bootScreen"></div>
+    <div id="loginScreen" style="display: none">
+      <div class="login-box">
+        <div class="login-row">
+          <label>USER_ID</label>
+          <input
+            type="text"
+            class="login-input"
+            id="loginUser"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <div class="login-row">
+          <label>PASSCODE</label>
+          <input type="password" class="login-input" id="loginPass" />
+        </div>
+        <button class="login-btn" id="btnLogin">[ AUTHENTICATE ]</button>
+      </div>
+    </div>
+    <div id="powerOffScreen" style="display: flex">
+      <button id="powerButton">[ I/O POWER ]</button>
+    </div>
+    <div class="container" style="display: none">
+      <nav class="navi">
+        <h1 class="glitch">cyber/net.sys</h1>
+
+        <a href="#" id="nav-home" data-section="home">Home</a>
+        <a href="#" id="nav-files" data-section="files">Files</a>
+        <a href="#" id="nav-settings" data-section="settings">Settings</a>
+        <a href="#" id="exitLink">Power Off</a>
+
+        <div class="status">
+          status: <span id="statusText">connected</span><br />
+          user: <span id="userDisplay">guest</span>
+        </div>
+      </nav>
+
+      <main class="content">
+        <section class="section" id="home">
+          <div class="window" style="display: block">
+            <div class="window-title">home.txt</div>
+
+            <img
+              src="assets/theme_Folder/default/logo_sync.gif"
+              alt="signal frame"
+              class="home-image"
+            />
+
+            <p>
+              <span id="homeMainText" class="dotting"
+                >the kamui-files are real. open your eyes</span
+              >
+              <br /><br />
+              <!-- <span class="cursor" id="homeCursor">connected</span> -->
+            </p>
+
+            <div
+              class="sys-info"
+              style="
+                margin-bottom: 15px;
+                border-top: 1px dashed #333;
+                padding-top: 10px;
+              "
+            >
+              <div class="window-title" style="margin-bottom: 5px">
+                SYSTEM_RESOURCES
+              </div>
+
+              <div class="resource-row">
+                <span>> CPU_CORE_0:</span>
+                <div class="resource-bar">
+                  <div class="resource-fill" id="cpu-fill"></div>
+                </div>
+              </div>
+              <div class="resource-row">
+                <span>> MEM_ALLOC:</span>
+                <div class="resource-bar">
+                  <div class="resource-fill" id="mem-fill"></div>
+                </div>
+              </div>
+              <div class="resource-row">
+                <span>> NET_TRAFFIC:</span>
+                <div class="resource-bar">
+                  <div class="resource-fill" id="net-fill"></div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="sys-info"
+              style="
+                margin-top: 15px;
+                border-top: 1px dashed #333;
+                padding-top: 10px;
+              "
+            >
+              <div class="window-title" style="margin-bottom: 5px">
+                SYSTEM_INFO
+              </div>
+
+              <p style="color: #555">> MEM: 64TB / 128TB [OK]</p>
+              <p style="color: #555">> NET: ENCRYPTED_V2</p>
+              <p style="color: #555">
+                > UPTIME: <span id="uptime">00:00:00</span>
+              </p>
+            </div>
+
+            <div
+              class="sys-info"
+              style="
+                margin-top: 15px;
+                border-top: 1px dashed #333;
+                padding-top: 10px;
+              "
+            >
+              <div class="window-title" style="margin-bottom: 5px">
+                SYSTEM_LOGS
+              </div>
+              <p style="color: #555">> [00:00]: BOOT_SEQ_INIT</p>
+              <p style="color: #555">> [00:01]: KERNEL_LOAD_OK</p>
+              <p style="color: #555">> [00:02]: USER_AUTH_OK</p>
+            </div>
+
+            <div class="sys-info" style="margin-top: 15px">
+              <div class="window-title" style="margin-bottom: 5px">
+                OPERATIONS
+              </div>
+              <p class="file" id="btnPurge">▸ [ PURGE_MEMORY_CACHE ]</p>
+            </div>
+          </div>
+
+          <div
+            class="window"
+            style="
+              display: block;
+              margin-top: 20px;
+              border: 1px solid #222;
+              background: #020202;
+              padding: 12px;
+            "
+          >
+            <div class="window-title" id="homeMediaTitle">
+              active_media.stream
+            </div>
+
+            <canvas
+              id="audioVisualizer"
+              style="
+                width: 100%;
+                height: 30px;
+                background: #050505;
+                border: 1px solid #333;
+                margin-bottom: 10px;
+                display: block;
+              "
+            ></canvas>
+
+            <div
+              class="media-controls"
+              style="border-top: none; margin-top: 0; padding-top: 0"
+            >
+              <div class="progress-bar" id="homeProgressBar">
+                <div class="progress-fill" id="homeProgressFill"></div>
+              </div>
+              <div class="controls-row">
+                <span class="btn" id="homeBtnPrev">&lt;&lt;</span>
+                <span class="btn" id="homeBtnPlay">[PLAY]</span>
+                <span class="btn" id="homeBtnNext">&gt;&gt;</span>
+                <span class="btn" id="homeBtnLoop">[LOOP: OFF]</span>
+                <div class="volume-control">
+                  <span>VOL</span>
+                  <input
+                    type="range"
+                    id="homeVolSlider"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value="0.5"
+                  />
+                </div>
+                <span class="time-display" id="homeTimeDisplay"
+                  >00:00 / 00:00</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="window section" id="files">
+          <div class="window-title">files/</div>
+        </section>
+
+        <section class="window section" id="media">
+          <div class="window-title" id="media-title"></div>
+          <video id="videoPlayer" hidden></video>
+          <audio id="audioPlayer" hidden></audio>
+          <audio id="musicPlayer" hidden></audio>
+
+          <div id="mediaVisual" class="media-visual" hidden>
+            PLAYING MEDIA STREAM
+          </div>
+
+          <div class="media-controls">
+            <div class="progress-bar" id="progressBar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="controls-row">
+              <span class="btn" id="btnPlay">[PLAY]</span>
+              <span class="btn" id="btnFullscreen">[FULL]</span>
+              <div class="volume-control">
+                <span id="volLabel">VOL</span>
+                <input
+                  type="range"
+                  id="volSlider"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value="0.5"
+                />
+              </div>
+              <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="window section" id="settings">
+          <div class="window-title">settings.cfg</div>
+
+          <div
+            class="settings-nav"
+            style="
+              display: flex;
+              gap: 15px;
+              margin-bottom: 15px;
+              border-bottom: 1px dashed #333;
+              padding-bottom: 5px;
+            "
+          >
+            <span
+              class="toggle active"
+              data-setting-tab="audio"
+              style="color: var(--primary-color)"
+              >[ AUDIO ]</span
+            >
+            <span class="toggle" data-setting-tab="video">[ VIDEO ]</span>
+            <span class="toggle" data-setting-tab="theme">[ THEME ]</span>
+          </div>
+
+          <div id="settings-audio" class="settings-tab-content">
+            <p class="toggle" id="soundToggle">
+              ▸ sound: <span id="soundState"> enabled </span>
+            </p>
+            <p class="toggle" id="clickToggle">
+              ▸ click_sfx: <span id="clickState"> enabled </span>
+            </p>
+            <p class="toggle" id="autoStopToggle">
+              ▸ auto_stop: <span id="autoStopState"> enabled </span>
+            </p>
+          </div>
+
+          <div
+            id="settings-video"
+            class="settings-tab-content"
+            style="display: none"
+          >
+            <p class="toggle" id="fullscreenToggle">
+              ▸ fullscreen: <span id="fullscreenState"> windowed </span>
+            </p>
+            <p class="toggle" id="visToggle">
+              ▸ visualizer: <span id="visState"> enabled </span>
+            </p>
+          </div>
+
+          <div
+            id="settings-theme"
+            class="settings-tab-content"
+            style="display: none"
+          >
+            <p class="toggle" id="themeToggle">
+              ▸ theme: <span id="themeState"> green </span>
+            </p>
+            <p class="toggle" id="overlayToggle">
+              ▸ overlay: <span id="overlayState"> enabled </span>
+            </p>
+            <p class="toggle" id="scanlinesToggle">
+              ▸ scanlines: <span id="scanlinesState"> enabled </span>
+            </p>
+            <p class="toggle" id="glitchToggle">
+              ▸ glitch_fx: <span id="glitchState"> enabled </span>
+            </p>
+            <p class="toggle" id="grayscaleToggle">
+              ▸ media_gray: <span id="grayscaleState"> enabled </span>
+            </p>
+            <p class="toggle" id="rgbToggle">
+              ▸ rgb_split: <span id="rgbState"> enabled </span>
+            </p>
+            <p class="toggle" id="shakeToggle" style="display: none">
+              ▸ scrn_shake: <span id="shakeState"> enabled </span>
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
